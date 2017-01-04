@@ -10,7 +10,7 @@ app.config.from_object('config')
 
 db = SQLAlchemy(app)
 
-from app import models
+from app import models, views
 
 db.create_all()
 
@@ -20,3 +20,4 @@ db.create_all()
 
 #db.session.add_all([item, blist, user])
 db.session.commit()
+

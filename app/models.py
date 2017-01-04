@@ -15,6 +15,9 @@ class User(db.Model):
     bucketlists = db.relationship('BucketList', backref="user",
                                   cascade="all,delete-orphan", lazy='dynamic')
 
+    def check_password(self, password):
+        return password == self.password
+
     def __repr__(self):
         return '<User %s %s>' % (self.first_name, self.last_name)
 
