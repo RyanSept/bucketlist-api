@@ -2,7 +2,9 @@ import sys
 sys.path.append('..')
 
 from datetime import datetime
-from app import db
+from app import app, db
+from itsdangerous import (TimedJSONWebSignatureSerializer
+                          as Serializer, BadSignature, SignatureExpired)
 
 
 class User(db.Model):
@@ -14,6 +16,26 @@ class User(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.utcnow())
     bucketlists = db.relationship('BucketList', backref="user",
                                   cascade="all,delete-orphan", lazy='dynamic')
+
+    @property
+    def id(self):
+        return self.user_id
+
+    def generate_auth_token(self, expiration=600):
+        token = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
+        return token.dumps({'id': self.user_id})
+
+    @staticmethod
+    def verify_auth_token(token):
+        _json = Serializer(app.config['SECRET_KEY'])
+        try:
+            data = _json.loads(token)
+        except SignatureExpired:
+            return None
+        except BadSignature:
+            return None
+        user = User.query.get(data['id'])
+        return user
 
     def check_password(self, password):
         return password == self.password

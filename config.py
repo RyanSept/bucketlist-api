@@ -11,3 +11,7 @@ CSRF_ENABLED = True
 CSRF_SESSION_KEY = "secret"
 
 SECRET_KEY = "secret"
+
+JWT_DEFAULT_REALM = 'Login Required'
+JWT_AUTH_USERNAME_KEY = 'email'
+JWT_AUTH_URL_RULE = '/auth/login'

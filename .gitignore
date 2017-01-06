@@ -3,3 +3,4 @@ bucketlist.sublime-workspace
 bucketlist.sublime-project
 __pycache__
 .DS_Store
+.coverage
