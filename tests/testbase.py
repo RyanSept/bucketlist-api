@@ -2,7 +2,8 @@ import sys
 sys.path.append('..')
 
 from unittest import TestCase
-from app import app
+from app import app, models, db
+from flask_sqlalchemy import SQLAlchemy
 import json
 
 
@@ -28,3 +29,21 @@ class BaseTestCase(TestCase):
         return {'Authorization': 'JWT %s' % token,
                 'Content-type': 'application/json'
                 }
+
+    def setup_test_db(self):
+        models.User.query.delete()
+        models.BucketList.query.delete()
+        models.ListItem.query.delete()
+
+        item = models.ListItem(item_name="Make tea")
+        bucketlist = models.BucketList(name='My Todo List', items=[item])
+        user = models.User(
+            first_name="John",
+            last_name="Doe",
+            email="johndoe@gmail.com",
+            password="password",
+            bucketlists=[bucketlist]
+        )
+
+        db.session.add_all([item, bucketlist, user])
+        db.session.commit()

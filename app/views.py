@@ -1,10 +1,11 @@
 import sys
 sys.path.append('..')
 
-from app import app
+from app import app, db
 from app.models import User, BucketList, ListItem
 from flask_jwt import JWT, jwt_required, current_identity
 from flask import request, g, jsonify, abort
+from app.validate import validate_register
 
 
 def verify_password(email, password):
@@ -22,6 +23,13 @@ def identity(payload):
 jwt = JWT(app, verify_password, identity)
 
 
+def user_exists(email):
+    exists = db.session.query(db.session.query(User)
+                              .filter_by(email=email)
+                              .exists()).scalar()
+    return exists
+
+
 @app.route("/resource", methods=['POST'])
 @jwt_required()
 def get_resource():
@@ -30,7 +38,32 @@ def get_resource():
 
 @app.route("/auth/register", methods=['POST'])
 def register_user():
-    pass
+    response = {}
+    _json = request.json
+    validation = validate_register(_json)
+    if validation[0]:
+        if not user_exists(_json["email"]):
+            user = User(
+                first_name=_json["first_name"],
+                last_name=_json["last_name"],
+                email=_json["email"],
+                password=_json["password"]
+            )
+            db.session.add(user)
+            db.session.commit()
+            status_code = 201
+            response["message"] = validation[1]
+        else:
+            status_code = 409
+            response["message"] = \
+                "The user with the email %s already exists" % (_json["email"])
+    else:
+        status_code = 400
+        response["message"] = validation[1]
+
+    response = jsonify(response)
+    response.status_code = status_code
+    return response
 
 
 @app.route("/bucketlists", methods=['POST'])
@@ -43,6 +76,7 @@ def create_bucketlist():
     else:
         response.status_code = 400
     return response
+
 
 @app.route("/bucketlists", methods=['GET'])
 @jwt_required()
