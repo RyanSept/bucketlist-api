@@ -30,20 +30,17 @@ class BaseTestCase(TestCase):
                 'Content-type': 'application/json'
                 }
 
-    def setup_test_db(self):
+    def tearDown(self):
         models.User.query.delete()
         models.BucketList.query.delete()
         models.ListItem.query.delete()
 
-        item = models.ListItem(item_name="Make tea")
-        bucketlist = models.BucketList(name='My Todo List', items=[item])
         user = models.User(
             first_name="John",
             last_name="Doe",
             email="johndoe@gmail.com",
-            password="password",
-            bucketlists=[bucketlist]
+            password="password"
         )
 
-        db.session.add_all([item, bucketlist, user])
+        db.session.add_all([user])
         db.session.commit()

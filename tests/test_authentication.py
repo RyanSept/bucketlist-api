@@ -69,7 +69,6 @@ class TestAuthentication(BaseTestCase):
         assert response.status_code == 401
 
     def test_can_register(self):
-        self.setup_test_db()
         user_data = {
             "first_name": "Ryan",
             "last_name": "Marvin",
@@ -89,7 +88,6 @@ class TestAuthentication(BaseTestCase):
         self.assertIsNotNone(new_user)
 
     def test_does_not_register_with_missing_fields(self):
-        self.setup_test_db()
         user_data = {
             "email": "ryan.marvin@andela.com",
         }
@@ -105,7 +103,6 @@ class TestAuthentication(BaseTestCase):
         self.assertIsNone(new_user)
 
     def test_register_validates_email(self):
-        self.setup_test_db()
         user_data = {
             "first_name": "Ryan",
             "last_name": "Marvin",
@@ -122,7 +119,6 @@ class TestAuthentication(BaseTestCase):
         assert response.status_code == 400
 
     def test_cannot_register_twice(self):
-        self.setup_test_db()
         user_data = {
             "first_name": "Ryan",
             "last_name": "Marvin",

@@ -13,13 +13,12 @@ class TestApi(BaseTestCase):
                                     data=json.dumps(bucketlist),
                                     headers=headers
                                     )
-
         assert response.status_code == 201
 
-        #exists = BucketList.query.filter(
-        #    bucketlist['name'] == BucketList.name).first()
+        exists = BucketList.query.filter(
+            bucketlist['name'] == BucketList.name).first()
 
-        #self.assertIsNotNone(exists)
+        self.assertIsNotNone(exists)
 
     def test_does_not_create_bucketlist_without_name(self):
         headers = self.get_auth_header()
@@ -30,3 +29,4 @@ class TestApi(BaseTestCase):
                                     )
 
         assert response.status_code == 400
+

@@ -5,7 +5,7 @@ from app import app, db
 from app.models import User, BucketList, ListItem
 from flask_jwt import JWT, jwt_required, current_identity
 from flask import request, g, jsonify, abort
-from app.validate import validate_register
+from app.validate import validate_register, validate_bucketlist
 
 
 def verify_password(email, password):
@@ -39,28 +39,27 @@ def get_resource():
 @app.route("/auth/register", methods=['POST'])
 def register_user():
     response = {}
-    _json = request.json
-    validation = validate_register(_json)
-    if validation[0]:
-        if not user_exists(_json["email"]):
+    json = request.json
+    validation = validate_register(json)
+    if validation.status:
+        if not user_exists(json["email"]):
             user = User(
-                first_name=_json["first_name"],
-                last_name=_json["last_name"],
-                email=_json["email"],
-                password=_json["password"]
+                first_name=json["first_name"],
+                last_name=json["last_name"],
+                email=json["email"],
+                password=json["password"]
             )
             db.session.add(user)
             db.session.commit()
             status_code = 201
-            response["message"] = validation[1]
         else:
             status_code = 409
             response["message"] = \
-                "The user with the email %s already exists" % (_json["email"])
+                "The user with the email %s already exists" % (json["email"])
     else:
         status_code = 400
-        response["message"] = validation[1]
 
+    response["message"] = validation.message
     response = jsonify(response)
     response.status_code = status_code
     return response
@@ -70,11 +69,24 @@ def register_user():
 @jwt_required()
 def create_bucketlist():
     '''Create a new bucket list'''
-    response = jsonify({})
-    if request.json.get('name'):
-        response.status_code = 201
+    # validate request
+    # create bucketlist adding it to the current user's list of bucketlists
+    # return response
+    response = {}
+    json = request.json
+    validation = validate_bucketlist(json)
+    if validation.status:
+        bucketlist = BucketList(name=json['name'])
+        current_identity.bucketlists.append(bucketlist)
+        db.session.add(bucketlist)
+        db.session.commit()
+        status_code = 201
     else:
-        response.status_code = 400
+        status_code = 400
+
+    response["message"] = validation.message
+    response = jsonify(response)
+    response.status_code = status_code
     return response
 
 
