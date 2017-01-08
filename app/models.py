@@ -72,6 +72,10 @@ class BucketList(db.Model):
             "created_by": self.owner_id
         }
 
+    def from_json(self, json):
+        self.name = json['name']
+        self.date_modified = datetime.utcnow()
+
     def items_to_json(self):
         '''returns list of items in bucketlist'''
         list_items = []

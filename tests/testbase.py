@@ -44,3 +44,13 @@ class BaseTestCase(TestCase):
 
         db.session.add_all([user])
         db.session.commit()
+
+    def create_bucketlist(self):
+        headers = self.get_auth_header()
+        bucketlist = {
+            "name": "BucketList1",
+        }
+        self.client.post('/bucketlists',
+                         data=json.dumps(bucketlist),
+                         headers=headers
+                         )

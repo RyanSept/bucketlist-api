@@ -103,6 +103,7 @@ def get_all_bucketlists():
     response = jsonify(response)
     return response
 
+
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['GET'])
 @jwt_required()
 def get_single_bucketlist():
@@ -111,8 +112,31 @@ def get_single_bucketlist():
 
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['PUT'])
 @jwt_required()
-def update_single_bucketlist():
-    pass
+def update_single_bucketlist(bucketlist_id):
+    # validate request
+    # get bucketlist
+    # update item
+    # save
+    response = {}
+    json = request.json
+    validation = validate_bucketlist(json)
+    bucketlist = BucketList.query.get(bucketlist_id)
+    if validation.status:
+        bucketlist.from_json(json)
+        db.session.commit()
+        validation.message = "Bucketlist %d successfully updated!" % (bucketlist_id)
+        status_code = 200
+    else:
+        status_code = 400
+
+    if bucketlist is None:
+        validation.message = "The requested bucketlist does not exist."
+        status_code = 409
+
+    response["message"] = validation.message
+    response = jsonify(response)
+    response.status_code = status_code
+    return response
 
 
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['DELETE'])

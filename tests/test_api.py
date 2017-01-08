@@ -57,3 +57,44 @@ class TestApi(BaseTestCase):
         bucketlists = data["bucketlists"]
 
         self.assertTrue(len(bucketlists) < 1)
+
+    def test_updates_bucketlist(self):
+        headers = self.get_auth_header()
+        # create bucketlist
+        self.create_bucketlist()
+
+        # update bucketlist
+        bucketlist2 = {"name": "Aruarian Dream"}
+        response = self.client.put('/bucketlists/1',
+                                   data=json.dumps(bucketlist2),
+                                   headers=headers
+                                   )
+
+        assert response.status_code == 200
+        changed = BucketList.query.filter(
+            bucketlist2['name'] == BucketList.name).first()
+
+        self.assertIsNotNone(changed)
+
+    def test_does_not_update_bucketlist_if_no_data_given(self):
+        headers = self.get_auth_header()
+        self.create_bucketlist()
+
+        bucketlist = {}
+        response = self.client.put('/bucketlists/1',
+                                   data=json.dumps(bucketlist),
+                                   headers=headers
+                                   )
+        assert response.status_code == 400
+
+    def test_handles_update_to_non_existent_bucketlist(self):
+        headers = self.get_auth_header()
+        bucketlist = {}
+        response = self.client.put('/bucketlists/1',
+                                   data=json.dumps(bucketlist),
+                                   headers=headers
+                                   )
+
+        assert response.status_code == 409
+        data = json.loads(response.get_data(as_text=True))
+        assert data["message"] == "The requested bucketlist does not exist."
