@@ -40,6 +40,14 @@ class User(db.Model):
     def check_password(self, password):
         return password == self.password
 
+    def get_bucketlists_as_json(self):
+        '''returns list of bucketlists owned by the user'''
+        list_bucketlists = []
+        for bucketlist in self.bucketlists:
+            list_bucketlists.append(bucketlist.to_json())
+
+        return list_bucketlists
+
     def __repr__(self):
         return '<User %s %s>' % (self.first_name, self.last_name)
 
@@ -54,6 +62,23 @@ class BucketList(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey(
         'user.user_id', ondelete='CASCADE'))
 
+    def to_json(self):
+        return {
+            "id": self.bucketlist_id,
+            "name": self.name,
+            "items": self.items_to_json(),
+            "date_created": self.date_created,
+            "date_modified": self.date_modified,
+            "created_by": self.owner_id
+        }
+
+    def items_to_json(self):
+        '''returns list of items in bucketlist'''
+        list_items = []
+        for item in self.items:
+            list_items.append(item.to_json())
+        return list_items
+
     def __repr__(self):
         return '<BucketList %s>' % (self.name)
 
@@ -66,6 +91,15 @@ class ListItem(db.Model):
     date_modified = db.Column(db.DateTime)
     bucketlist_id = db.Column(
         db.Integer, db.ForeignKey('bucket_list.bucketlist_id', ondelete='CASCADE'))
+
+    def to_json(self):
+        return {
+            "id": self.item_id,
+            "name": self.item_name,
+            "date_created": self.date_created,
+            "date_modified": self.date_modified,
+            "done": self.done
+        }
 
     def __repr__(self):
         return '<ListItem %s>' % (self.item_name)

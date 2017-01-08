@@ -69,9 +69,6 @@ def register_user():
 @jwt_required()
 def create_bucketlist():
     '''Create a new bucket list'''
-    # validate request
-    # create bucketlist adding it to the current user's list of bucketlists
-    # return response
     response = {}
     json = request.json
     validation = validate_bucketlist(json)
@@ -94,7 +91,17 @@ def create_bucketlist():
 @jwt_required()
 def get_all_bucketlists():
     '''List all the created bucket lists'''
+    # get json of users bucketlists
+    # return bucketlists
+    response = {}
+    response["bucketlists"] = current_identity.get_bucketlists_as_json()
+    response["meta"] = {}
 
+    if len(response["bucketlists"]) < 1:
+        response["message"] = "No bucketlists exist."
+
+    response = jsonify(response)
+    return response
 
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['GET'])
 @jwt_required()
