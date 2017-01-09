@@ -229,27 +229,55 @@ def update_bucketlist_item(bucketlist_id, item_id):
         owner_id=user_id
     ).first()
 
-    bucketlist_item = bucketlist.get_item(item_id)
+    bucketlist_item = None
+
+    if bucketlist is not None:
+        bucketlist_item = bucketlist.get_item(item_id)
 
     if bucketlist_item is not None:
         if validation.status:
             bucketlist_item.from_json(json)
             db.session.commit()
             validation.message = "Bucketlist item %d successfully updated!" % (
-                bucketlist_id)
+                item_id)
             status_code = 200
         else:
             status_code = 400
     else:
         status_code = 404
-        validation.message = "The requested bucketlist item does not exist."
+        validation.message = "The requested bucketlist or bucketlist item does not exist."
 
     response["message"] = validation.message
     response = jsonify(response)
     response.status_code = status_code
     return response
 
+
 @app.route("/bucketlists/<int:bucketlist_id>/items/<int:item_id>", methods=['DELETE'])
 @jwt_required()
 def delete_item_from_bucketlist(bucketlist_id, item_id):
-    pass
+    response = {}
+    user_id = current_identity.user_id
+    bucketlist = BucketList.query.filter_by(
+        bucketlist_id=bucketlist_id,
+        owner_id=user_id
+    ).first()
+
+    bucketlist_item = None
+
+    if bucketlist is not None:
+        bucketlist_item = bucketlist.get_item(item_id)
+
+    if bucketlist_item is not None:
+        db.session.delete(bucketlist_item)
+        status_code = 200
+        response["message"] = "The bucketlist item with id %d has been deleted" % (
+            item_id)
+        db.session.commit()
+    else:
+        status_code = 404
+        response["message"] = "The bucketlist or bucketlist item does not exist."
+
+    response = jsonify(response)
+    response.status_code = status_code
+    return response

@@ -281,7 +281,7 @@ class TestItemsApi(BaseTestCase):
                                    )
         assert response.status_code == 400
 
-    def test_handles_update_to_non_existent_bucketlist_item(self):
+    def test_update_to_non_existent_bucketlist_item(self):
         headers = self.get_auth_header()
 
         self.create_bucketlist()
@@ -291,4 +291,26 @@ class TestItemsApi(BaseTestCase):
                                    data=json.dumps(item_update),
                                    headers=headers
                                    )
+        assert response.status_code == 404
+
+    def test_can_delete_bucketlist_item(self):
+        headers = self.get_auth_header()
+        self.create_bucketlist()
+        self.add_bucketlist_item()
+
+        response = self.client.delete('/bucketlists/1/items/1',
+                                      headers=headers
+                                      )
+
+        assert response.status_code == 200
+
+        bucketlist_item = ListItem.query.get(1)
+        self.assertIsNone(bucketlist_item)
+
+    def test_delete_when_bucketlist_item_doesnt_exist(self):
+        headers = self.get_auth_header()
+
+        response = self.client.delete('/bucketlists/1/items/1',
+                                      headers=headers)
+
         assert response.status_code == 404
