@@ -80,6 +80,24 @@ class TestApi(BaseTestCase):
         data = response.get_data(as_text=True)
         self.assertNotIn("Bucketlist1", data)
 
+    def test_lists_single_bucketlist(self):
+        headers = self.get_auth_header()
+        self.create_bucketlist()
+
+        response = self.client.get('/bucketlists/1', headers=headers)
+        assert response.status_code == 200
+
+        data = json.loads(response.get_data(as_text=True))
+        assert len(data["bucketlist"]) > 0
+
+    def test_list_single_bucketlist_when_id_non_existent(self):
+        headers = self.get_auth_header()
+        response = self.client.get('/bucketlists/1', headers=headers)
+        assert response.status_code == 404
+
+        data = json.loads(response.get_data(as_text=True))
+        self.assertTrue(len(data["bucketlist"]) < 1)
+
     def test_updates_bucketlist(self):
         headers = self.get_auth_header()
         # create bucketlist

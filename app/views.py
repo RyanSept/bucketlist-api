@@ -109,8 +109,27 @@ def get_all_bucketlists():
 
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['GET'])
 @jwt_required()
-def get_single_bucketlist():
-    pass
+def get_single_bucketlist(bucketlist_id):
+    response = {}
+    response["bucketlist"] = {}
+    response["meta"] = {}
+
+    user_id = current_identity.user_id
+    bucketlist = BucketList.query.filter(
+        bucketlist_id == BucketList.bucketlist_id,
+        user_id == BucketList.owner_id
+    ).first()
+
+    if bucketlist is not None:
+        response["bucketlist"] = bucketlist.to_json()
+        status_code = 200
+    else:
+        status_code = 404
+        response["message"] = "The requested bucketlist does not exist."
+
+    response = jsonify(response)
+    response.status_code = status_code
+    return response
 
 
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['PUT'])
