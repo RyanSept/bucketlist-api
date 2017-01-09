@@ -96,11 +96,14 @@ def get_all_bucketlists():
     response = {}
     response["bucketlists"] = current_identity.get_bucketlists_as_json()
     response["meta"] = {}
+    status_code = 200
 
     if len(response["bucketlists"]) < 1:
+        status_code = 404
         response["message"] = "No bucketlists exist."
 
     response = jsonify(response)
+    response.status_code = status_code
     return response
 
 
@@ -124,7 +127,8 @@ def update_single_bucketlist(bucketlist_id):
     if validation.status:
         bucketlist.from_json(json)
         db.session.commit()
-        validation.message = "Bucketlist %d successfully updated!" % (bucketlist_id)
+        validation.message = "Bucketlist %d successfully updated!" % (
+            bucketlist_id)
         status_code = 200
     else:
         status_code = 400
@@ -141,9 +145,25 @@ def update_single_bucketlist(bucketlist_id):
 
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['DELETE'])
 @jwt_required()
-def delete_single_bucketlist():
-    pass
+def delete_single_bucketlist(bucketlist_id):
+    # check if bucketlist
+    # remove bucketlist
+    # return response
+    response = {}
+    bucketlist = BucketList.query.get(bucketlist_id)
 
+    if bucketlist is not None:
+        db.session.delete(bucketlist)
+        status_code = 200
+        response["message"] = "The bucketlist with id %d has been deleted" % (bucketlist.bucketlist_id)
+        db.session.commit()
+    else:
+        status_code = 404
+        response["message"] = "The bucketlist does not exist."
+
+    response = jsonify(response)
+    response.status_code = status_code
+    return response
 
 @app.route("/bucketlists/<int:bucketlist_id>/items", methods=['POST'])
 @jwt_required()

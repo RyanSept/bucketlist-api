@@ -51,7 +51,7 @@ class TestApi(BaseTestCase):
     def test_list_bucketlists_when_no_bucketlists_exist(self):
         headers = self.get_auth_header()
         response = self.client.get('/bucketlists', headers=headers)
-        assert response.status_code == 200
+        assert response.status_code == 404
 
         data = json.loads(response.get_data(as_text=True))
         bucketlists = data["bucketlists"]
@@ -98,3 +98,24 @@ class TestApi(BaseTestCase):
         assert response.status_code == 409
         data = json.loads(response.get_data(as_text=True))
         assert data["message"] == "The requested bucketlist does not exist."
+
+    def test_deletes(self):
+        self.create_bucketlist()
+        headers = self.get_auth_header()
+
+        response = self.client.delete('/bucketlists/1', headers=headers)
+
+        assert response.status_code == 200
+
+        bucketlist = BucketList.query.get(1)
+        self.assertIsNone(bucketlist)
+
+    def test_delete_when_bucketlist_doesnt_exist(self):
+        headers = self.get_auth_header()
+
+        response = self.client.delete('/bucketlists/1', headers=headers)
+
+        assert response.status_code == 404
+
+    def test_does_not_delete_other_users_bucketlist(self):
+        pass
