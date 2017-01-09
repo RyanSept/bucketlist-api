@@ -83,6 +83,11 @@ class BucketList(db.Model):
             list_items.append(item.to_json())
         return list_items
 
+    def get_item(self, item_id):
+        for item in self.items:
+            if item.item_id == item_id:
+                return item
+
     def __repr__(self):
         return '<BucketList %s>' % (self.name)
 

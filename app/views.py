@@ -123,7 +123,11 @@ def update_single_bucketlist(bucketlist_id):
     response = {}
     json = request.json
     validation = validate_bucketlist(json)
-    bucketlist = BucketList.query.get(bucketlist_id)
+    user_id = current_identity.user_id
+    bucketlist = BucketList.query.filter(
+        bucketlist_id == BucketList.bucketlist_id,
+        user_id == BucketList.owner_id
+    ).first()
 
     if validation.status and bucketlist:
         bucketlist.from_json(json)
@@ -208,13 +212,44 @@ def create_bucketlist_item(bucketlist_id):
     return response
 
 
-@app.route("/bucketlists/<int:id>/items/<int:item_id>", methods=['PUT'])
+@app.route("/bucketlists/<int:bucketlist_id>/items/<int:item_id>", methods=['PUT'])
 @jwt_required()
-def update_bucketlist_item():
-    pass
+def update_bucketlist_item(bucketlist_id, item_id):
+    # validate request
+    # get bucketlist
+    # update item
+    # save
+    response = {}
+    json = request.json
+    validation = validate_item(json)
 
+    user_id = current_identity.user_id
+    bucketlist = BucketList.query.filter_by(
+        bucketlist_id=bucketlist_id,
+        owner_id=user_id
+    ).first()
 
-@app.route("/bucketlists/<int:id>/items/<int:item_id>", methods=['DELETE'])
+    bucketlist_item = bucketlist.get_item(item_id)
+
+    if bucketlist_item is not None:
+        if validation.status:
+            bucketlist_item.from_json(json)
+            db.session.commit()
+            validation.message = "Bucketlist item %d successfully updated!" % (
+                bucketlist_id)
+            status_code = 200
+        else:
+            status_code = 400
+    else:
+        status_code = 404
+        validation.message = "The requested bucketlist item does not exist."
+
+    response["message"] = validation.message
+    response = jsonify(response)
+    response.status_code = status_code
+    return response
+
+@app.route("/bucketlists/<int:bucketlist_id>/items/<int:item_id>", methods=['DELETE'])
 @jwt_required()
-def delete_item_from_bucketlist():
+def delete_item_from_bucketlist(bucketlist_id, item_id):
     pass

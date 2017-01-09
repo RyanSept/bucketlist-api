@@ -69,3 +69,12 @@ class BaseTestCase(TestCase):
             content_type="application/json",
             data=json.dumps(user_data)
         )
+
+    def add_bucketlist_item(self):
+        headers = self.get_auth_header()
+
+        item = {"name": "Foo the bar"}
+        self.client.post("/bucketlists/1/items",
+                         data=json.dumps(item),
+                         headers=headers
+                         )

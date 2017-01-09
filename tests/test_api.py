@@ -86,15 +86,15 @@ class TestApi(BaseTestCase):
         self.create_bucketlist()
 
         # update bucketlist
-        bucketlist2 = {"name": "Aruarian Dream"}
+        bucketlist_update = {"name": "Aruarian Dream"}
         response = self.client.put('/bucketlists/1',
-                                   data=json.dumps(bucketlist2),
+                                   data=json.dumps(bucketlist_update),
                                    headers=headers
                                    )
 
         assert response.status_code == 200
         changed = BucketList.query.filter(
-            bucketlist2['name'] == BucketList.name).first()
+            bucketlist_update['name'] == BucketList.name).first()
 
         self.assertIsNotNone(changed)
 
@@ -251,3 +251,44 @@ class TestItemsApi(BaseTestCase):
 
         assert response.status_code == 404
 
+    def test_can_update_bucketlist_item(self):
+        headers = self.get_auth_header()
+
+        self.create_bucketlist()
+        self.add_bucketlist_item()
+
+        item_update = {"name": "Gospod da pridet tvoyo tsartsova"}
+        response = self.client.put("/bucketlists/1/items/1",
+                                   data=json.dumps(item_update),
+                                   headers=headers
+                                   )
+        assert response.status_code == 200
+        changed = ListItem.query.filter(
+            item_update['name'] == ListItem.item_name).first()
+
+        self.assertIsNotNone(changed)
+
+    def test_doesnt_update_bucketlist_item_if_invalid_data(self):
+        headers = self.get_auth_header()
+
+        self.create_bucketlist()
+        self.add_bucketlist_item()
+
+        item_update = {}
+        response = self.client.put("/bucketlists/1/items/1",
+                                   data=json.dumps(item_update),
+                                   headers=headers
+                                   )
+        assert response.status_code == 400
+
+    def test_handles_update_to_non_existent_bucketlist_item(self):
+        headers = self.get_auth_header()
+
+        self.create_bucketlist()
+
+        item_update = {"name": "Gospod da pridet tvoyo tsartsova"}
+        response = self.client.put("/bucketlists/1/items/1",
+                                   data=json.dumps(item_update),
+                                   headers=headers
+                                   )
+        assert response.status_code == 404
