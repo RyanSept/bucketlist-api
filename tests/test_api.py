@@ -58,6 +58,28 @@ class TestApi(BaseTestCase):
 
         self.assertTrue(len(bucketlists) < 1)
 
+    def test_does_not_list_other_users_bucketlists(self):
+        # create second user in system and login
+        self.register_second_user()
+        response = self.client.post('/auth/login',
+                                    data=json.dumps(
+                                        {"email": "ryan.marvin@andela.com",
+                                         "password": "password"}),
+                                    content_type='application/json'
+                                    )
+        token = json.loads(response.get_data(as_text=True))['access_token']
+        ryan = {'Authorization': 'JWT %s' % token,
+                'Content-type': 'application/json'
+                }
+
+        # create for john a bucketlist with name 'Bucketlist1'
+        self.create_bucketlist()
+
+        # get ryans bucketlists and assert john's bucketlist isn't there
+        response = self.client.get('/bucketlists', headers=ryan)
+        data = response.get_data(as_text=True)
+        self.assertNotIn("Bucketlist1", data)
+
     def test_updates_bucketlist(self):
         headers = self.get_auth_header()
         # create bucketlist
@@ -118,14 +140,49 @@ class TestApi(BaseTestCase):
         assert response.status_code == 404
 
     def test_cannot_delete_other_users_bucketlist(self):
-        pass
+        # create second user in system and login
+        self.register_second_user()
+        response = self.client.post('/auth/login',
+                                    data=json.dumps(
+                                        {"email": "ryan.marvin@andela.com",
+                                         "password": "password"}),
+                                    content_type='application/json'
+                                    )
+        token = json.loads(response.get_data(as_text=True))['access_token']
+        ryan = {'Authorization': 'JWT %s' % token,
+                'Content-type': 'application/json'
+                }
+
+        # create for john a bucketlist with name 'Bucketlist1'
+        self.create_bucketlist()
+
+        # attempt to delete
+        response = self.client.delete('/bucketlists/1', headers=ryan)
+        assert response.status_code == 404
 
     def test_delete_bucketlist_deletes_bucketlist_items(self):
-        pass
+        # create bucketlist
+        self.create_bucketlist()
+        headers = self.get_auth_header()
+
+        # add item to created bucketlist
+        item = {"name": "Foo the bar"}
+        self.client.post("/bucketlists/1/items",
+                         data=json.dumps(item),
+                         headers=headers
+                         )
+
+        # remove bucketlist
+        response = self.client.delete('/bucketlists/1', headers=headers)
+        assert response.status_code == 200
+
+        bucketlist_items = ListItem.query.filter(
+            ListItem.bucketlist_id == 1).first()
+        self.assertIsNone(bucketlist_items)
 
 
 class TestItemsApi(BaseTestCase):
-    def test_create_bucketlist_item(self):
+    def test_add_bucketlist_item(self):
         self.create_bucketlist()
         headers = self.get_auth_header()
 
@@ -142,7 +199,7 @@ class TestItemsApi(BaseTestCase):
         self.assertIsNotNone(exists)
         # assert exists.bucketlist_id == 1
 
-    def test_does_not_create_bucketlist_item_with_invalid_data(self):
+    def test_does_not_add_bucketlist_item_with_invalid_data(self):
         self.create_bucketlist()
         headers = self.get_auth_header()
 
@@ -155,7 +212,7 @@ class TestItemsApi(BaseTestCase):
         data = json.loads(response.get_data(as_text=True))
         assert data["message"] == "You did not include the item name."
 
-    def test_doesnt_create_bucketlist_item_if_non_existent_bucketlist_id(self):
+    def test_doesnt_add_bucketlist_item_if_non_existent_bucketlist_id(self):
         headers = self.get_auth_header()
 
         item = json.dumps({"name": "Foo the bar"})
@@ -169,4 +226,28 @@ class TestItemsApi(BaseTestCase):
         assert data["message"] == "The requested bucketlist does not exist."
 
     def test_cannot_add_items_in_other_users_bucketlists(self):
-        pass
+        # create second user in system and login
+        self.register_second_user()
+        response = self.client.post('/auth/login',
+                                    data=json.dumps(
+                                        {"email": "ryan.marvin@andela.com",
+                                         "password": "password"}),
+                                    content_type='application/json'
+                                    )
+        token = json.loads(response.get_data(as_text=True))['access_token']
+        ryan = {'Authorization': 'JWT %s' % token,
+                'Content-type': 'application/json'
+                }
+
+        # create for john a bucketlist with name 'Bucketlist1'
+        self.create_bucketlist()
+
+        # attempt to add items
+        item = {"name": "Foo the bar"}
+        response = self.client.post("/bucketlists/1/items",
+                                    data=json.dumps(item),
+                                    headers=ryan
+                                    )
+
+        assert response.status_code == 404
+

@@ -58,7 +58,7 @@ class BucketList(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.utcnow())
     date_modified = db.Column(db.DateTime)
     items = db.relationship('ListItem', backref="bucket_list",
-                            cascade="all,delete-orphan", lazy='select', passive_deletes=True)
+                            cascade="all,delete-orphan", lazy='select')
     owner_id = db.Column(db.Integer, db.ForeignKey(
         'user.user_id', ondelete='CASCADE'))
 

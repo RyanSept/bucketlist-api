@@ -54,3 +54,18 @@ class BaseTestCase(TestCase):
                          data=json.dumps(bucketlist),
                          headers=headers
                          )
+
+    def register_second_user(self):
+        '''Registers other user for testing'''
+        user_data = {
+            "first_name": "Ryan",
+            "last_name": "Marvin",
+            "email": "ryan.marvin@andela.com",
+            "password": "password",
+        }
+
+        self.client.post(
+            "/auth/register",
+            content_type="application/json",
+            data=json.dumps(user_data)
+        )

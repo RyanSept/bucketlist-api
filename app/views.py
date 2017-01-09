@@ -151,7 +151,11 @@ def delete_single_bucketlist(bucketlist_id):
     # remove bucketlist
     # return response
     response = {}
-    bucketlist = BucketList.query.get(bucketlist_id)
+    user_id = current_identity.user_id
+    bucketlist = BucketList.query.filter(
+        bucketlist_id == BucketList.bucketlist_id,
+        user_id == BucketList.owner_id
+    ).first()
 
     if bucketlist is not None:
         db.session.delete(bucketlist)
