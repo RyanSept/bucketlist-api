@@ -56,4 +56,16 @@ def validate_bucketlist(json):
 
 
 def validate_item(json):
-    pass
+    validation = Validation()
+    try:
+        if not len(json['name']) > 0:
+            validation.status = False
+            validation.message = "The item name is too short."
+        else:
+            validation.status = True
+            validation.message = "Item successfully created!"
+        return validation
+    except KeyError:
+        validation.status = False
+        validation.message = "You did not include the item name."
+        return validation

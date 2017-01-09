@@ -117,5 +117,56 @@ class TestApi(BaseTestCase):
 
         assert response.status_code == 404
 
-    def test_does_not_delete_other_users_bucketlist(self):
+    def test_cannot_delete_other_users_bucketlist(self):
+        pass
+
+    def test_delete_bucketlist_deletes_bucketlist_items(self):
+        pass
+
+
+class TestItemsApi(BaseTestCase):
+    def test_create_bucketlist_item(self):
+        self.create_bucketlist()
+        headers = self.get_auth_header()
+
+        item = {"name": "Foo the bar"}
+        response = self.client.post("/bucketlists/1/items",
+                                    data=json.dumps(item),
+                                    headers=headers
+                                    )
+        assert response.status_code == 201
+
+        exists = ListItem.query.filter(
+            item['name'] == ListItem.item_name).first()
+
+        self.assertIsNotNone(exists)
+        # assert exists.bucketlist_id == 1
+
+    def test_does_not_create_bucketlist_item_with_invalid_data(self):
+        self.create_bucketlist()
+        headers = self.get_auth_header()
+
+        item = json.dumps({})
+        response = self.client.post("/bucketlists/1/items",
+                                    data=item, headers=headers
+                                    )
+        assert response.status_code == 400
+
+        data = json.loads(response.get_data(as_text=True))
+        assert data["message"] == "You did not include the item name."
+
+    def test_doesnt_create_bucketlist_item_if_non_existent_bucketlist_id(self):
+        headers = self.get_auth_header()
+
+        item = json.dumps({"name": "Foo the bar"})
+        response = self.client.post("/bucketlists/1/items",
+                                    data=item, headers=headers
+                                    )
+
+        assert response.status_code == 404
+
+        data = json.loads(response.get_data(as_text=True))
+        assert data["message"] == "The requested bucketlist does not exist."
+
+    def test_cannot_add_items_in_other_users_bucketlists(self):
         pass

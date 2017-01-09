@@ -105,5 +105,9 @@ class ListItem(db.Model):
             "done": self.done
         }
 
+    def from_json(self, json):
+        self.item_name = json['name']
+        self.date_modified = datetime.utcnow()
+
     def __repr__(self):
         return '<ListItem %s>' % (self.item_name)

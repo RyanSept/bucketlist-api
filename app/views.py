@@ -5,7 +5,7 @@ from app import app, db
 from app.models import User, BucketList, ListItem
 from flask_jwt import JWT, jwt_required, current_identity
 from flask import request, g, jsonify, abort
-from app.validate import validate_register, validate_bucketlist
+from app.validate import validate_register, validate_bucketlist, validate_item
 
 
 def verify_password(email, password):
@@ -124,7 +124,8 @@ def update_single_bucketlist(bucketlist_id):
     json = request.json
     validation = validate_bucketlist(json)
     bucketlist = BucketList.query.get(bucketlist_id)
-    if validation.status:
+
+    if validation.status and bucketlist:
         bucketlist.from_json(json)
         db.session.commit()
         validation.message = "Bucketlist %d successfully updated!" % (
@@ -155,7 +156,8 @@ def delete_single_bucketlist(bucketlist_id):
     if bucketlist is not None:
         db.session.delete(bucketlist)
         status_code = 200
-        response["message"] = "The bucketlist with id %d has been deleted" % (bucketlist.bucketlist_id)
+        response["message"] = "The bucketlist with id %d has been deleted" % (
+            bucketlist.bucketlist_id)
         db.session.commit()
     else:
         status_code = 404
@@ -165,10 +167,41 @@ def delete_single_bucketlist(bucketlist_id):
     response.status_code = status_code
     return response
 
+
 @app.route("/bucketlists/<int:bucketlist_id>/items", methods=['POST'])
 @jwt_required()
-def create_bucketlist_item():
-    pass
+def create_bucketlist_item(bucketlist_id):
+    # check and get if bucketlist
+    # validate request
+    # create item and put in bucketlist
+    # save
+    response = {}
+    json = request.json
+    validation = validate_item(json)
+
+    user_id = current_identity.user_id
+    bucketlist = BucketList.query.filter(
+        bucketlist_id == BucketList.bucketlist_id,
+        user_id == BucketList.owner_id
+    ).first()
+
+    if bucketlist is not None:
+        if validation.status:
+            item = ListItem(item_name=json['name'])
+            bucketlist.items.append(item)
+            db.session.add(item)
+            db.session.commit()
+            status_code = 201
+        else:
+            status_code = 400
+    else:
+        status_code = 404
+        validation.message = "The requested bucketlist does not exist."
+
+    response["message"] = validation.message
+    response = jsonify(response)
+    response.status_code = status_code
+    return response
 
 
 @app.route("/bucketlists/<int:id>/items/<int:item_id>", methods=['PUT'])
