@@ -1,6 +1,3 @@
-import sys
-sys.path.append('..')
-
 from app import app, db
 from app.models import User, BucketList, ListItem
 from flask_jwt import JWT, jwt_required, current_identity

@@ -1,6 +1,3 @@
-import sys
-sys.path.append('..')
-
 from unittest import TestCase
 from app import app, models, db
 from flask_sqlalchemy import SQLAlchemy
