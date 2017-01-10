@@ -4,6 +4,7 @@ sys.path.append('..')
 from app import app, db
 from app.models import User, BucketList, ListItem
 from flask_jwt import JWT, jwt_required, current_identity
+from werkzeug.exceptions import HTTPException, default_exceptions
 from flask import request, g, jsonify, abort
 from app.validate import validate_register, validate_bucketlist, validate_item\
     , validate_limit_and_offset
@@ -37,6 +38,22 @@ def get_resource():
     return jsonify(dict(msg="Hello world"))
 
 
+def handle_error(error):
+    response = {}
+    status_code = 500
+    if isinstance(error, HTTPException):
+        status_code = error.code
+    response["status_code"] = status_code
+    response["error"] = str(error)
+    response['description'] = error.description
+    return jsonify(response), status_code
+
+
+# change error handler to return json instead of html
+for code in default_exceptions.keys():
+    app.errorhandler(code)(handle_error)
+
+
 @app.route("/auth/register", methods=['POST'])
 def register_user():
     response = {}
@@ -54,7 +71,8 @@ def register_user():
             db.session.commit()
             status_code = 201
             response["message"] = \
-                "Successfully registered the user with the email %s." % (json["email"])
+                "Successfully registered the user with the email %s." % (json[
+                                                                         "email"])
         else:
             status_code = 409
             response["message"] = \
@@ -114,7 +132,8 @@ def get_all_bucketlists():
                 response["message"] = "No bucketlists exist."
         else:
             status_code = 400
-            response["message"] = "Invalid format for limit or offset. Should be integer"
+            response[
+                "message"] = "Invalid format for limit or offset. Should be integer"
 
     elif name is not None and len(name) > 0:
         response["bucketlists"] = []
