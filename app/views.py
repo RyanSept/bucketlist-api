@@ -94,13 +94,63 @@ def get_all_bucketlists():
     # get json of users bucketlists
     # return bucketlists
     response = {}
-    response["bucketlists"] = current_identity.get_bucketlists_as_json()
-    response["meta"] = {}
-    status_code = 200
+    name = request.args.get('q')
 
-    if len(response["bucketlists"]) < 1:
+    if name is None:
+        response["bucketlists"] = current_identity.get_bucketlists_as_json()
+        response["meta"] = {}
+        status_code = 200
+
+        if len(response["bucketlists"]) < 1:
+            status_code = 404
+            response["message"] = "No bucketlists exist."
+
+    elif name is not None and len(name) > 0:
+        response["bucketlists"] = []
+
+        name = name.lower()
+        query = "%" + name + "%"
+        bucketlists = BucketList.query.filter(
+            BucketList.name.like(query)).filter_by(
+            owner_id=current_identity.user_id).all()
+
+        if bucketlists:
+            for bucketlist in bucketlists:
+                response["bucketlists"].append(bucketlist.to_json())
+
+            status_code = 200
+
+        else:
+            status_code = 404
+            response["message"] = "No bucketlists by that name found."
+
+    response = jsonify(response)
+    response.status_code = status_code
+    return response
+
+
+#@app.route("/bucketlists?q=<name>", methods=['GET'], defaults={'name': None})
+#@jwt_required()
+def search_bucketlist(name):
+    response = {}
+    response["bucketlists"] = []
+    response["meta"] = {}
+
+    if name is not None and len(name) > 0:
+        name = name.lower()
+        query = "%" + name + "%"
+        bucketlists = BucketList.query.filter(
+            BucketList.name.like(query)).filter_by(
+            owner_id=current_identity.user_id).all()
+
+        for bucketlist in bucketlists:
+            response["bucketlists"].append(bucketlist.to_json())
+
+        status_code = 200
+
+    else:
         status_code = 404
-        response["message"] = "No bucketlists exist."
+        response["message"] = "No bucketlists by that name found."
 
     response = jsonify(response)
     response.status_code = status_code

@@ -43,7 +43,7 @@ class TestApi(BaseTestCase):
 
         # request for bucketlists
         response = self.client.get('/bucketlists', headers=headers)
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
 
         data = response.get_data(as_text=True)
         self.assertIn(bucketlist["name"], data)
@@ -55,7 +55,6 @@ class TestApi(BaseTestCase):
 
         data = json.loads(response.get_data(as_text=True))
         bucketlists = data["bucketlists"]
-
         self.assertTrue(len(bucketlists) < 1)
 
     def test_does_not_list_other_users_bucketlists(self):
@@ -197,6 +196,27 @@ class TestApi(BaseTestCase):
         bucketlist_items = ListItem.query.filter(
             ListItem.bucketlist_id == 1).first()
         self.assertIsNone(bucketlist_items)
+
+    def test_search_bucketlist_by_name(self):
+        headers = self.get_auth_header()
+        self.create_bucketlist()
+
+        response = self.client.get('/bucketlists?q=bucketlist1',
+                                   headers=headers)
+        assert response.status_code == 200
+
+        data = json.loads(response.get_data(as_text=True))
+        assert len(data["bucketlists"]) == 1
+
+    def test_search_nonexistent_bucketlist_by_name(self):
+        headers = self.get_auth_header()
+        response = self.client.get('/bucketlists?q=bucketlist1',
+                                   headers=headers)
+
+        self.assertEqual(response.status_code, 404)
+
+        data = json.loads(response.get_data(as_text=True))
+        assert data["message"] == "No bucketlists by that name found."
 
 
 class TestItemsApi(BaseTestCase):
