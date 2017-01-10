@@ -4,3 +4,4 @@ python:
 install:
     - pip install -r requirements.txt
 cache: pip
+script: "nosetests --with-coverage --cover-package=app"
