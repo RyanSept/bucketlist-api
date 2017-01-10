@@ -68,6 +68,14 @@ class TestAuthentication(BaseTestCase):
         response = self.client.post('/bucketlists/1/items')
         assert response.status_code == 401
 
+    def test_cannot_update_bucketlist_item_if_not_authenticated(self):
+        response = self.client.put('/bucketlists/1/items/1')
+        assert response.status_code == 401
+
+    def test_cannot_delete_bucketlist_item_if_not_authenticated(self):
+        response = self.client.put('/bucketlists/1/items/1')
+        assert response.status_code == 401
+
     def test_can_register(self):
         user_data = {
             "first_name": "Ryan",
@@ -108,6 +116,22 @@ class TestAuthentication(BaseTestCase):
             "last_name": "Marvin",
             "email": "wrongemail",
             "password": "password",
+        }
+
+        response = self.client.post(
+            "/auth/register",
+            content_type="application/json",
+            data=json.dumps(user_data)
+        )
+
+        assert response.status_code == 400
+
+    def test_register_rejects_password_less_than_8_chars(self):
+        user_data = {
+            "first_name": "Ryan",
+            "last_name": "Marvin",
+            "email": "wrongemail",
+            "password": "word",
         }
 
         response = self.client.post(

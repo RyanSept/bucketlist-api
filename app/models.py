@@ -21,22 +21,6 @@ class User(db.Model):
     def id(self):
         return self.user_id
 
-    def generate_auth_token(self, expiration=600):
-        token = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
-        return token.dumps({'id': self.user_id})
-
-    @staticmethod
-    def verify_auth_token(token):
-        _json = Serializer(app.config['SECRET_KEY'])
-        try:
-            data = _json.loads(token)
-        except SignatureExpired:
-            return None
-        except BadSignature:
-            return None
-        user = User.query.get(data['id'])
-        return user
-
     def check_password(self, password):
         return password == self.password
 
@@ -55,9 +39,6 @@ class User(db.Model):
             list_bucketlists.append(bucketlist.to_json())
 
         return list_bucketlists[offset:limit + offset]
-
-    def __repr__(self):
-        return '<User %s %s>' % (self.first_name, self.last_name)
 
 
 class BucketList(db.Model):

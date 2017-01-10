@@ -70,6 +70,7 @@ class BaseTestCase(TestCase):
         )
 
     def add_bucketlist_item(self):
+        '''adds a bucketlist item'''
         headers = self.get_auth_header()
 
         item = {"name": "Foo the bar"}

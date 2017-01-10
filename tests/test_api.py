@@ -30,6 +30,16 @@ class TestApi(BaseTestCase):
 
         assert response.status_code == 400
 
+    def test_does_not_create_bucketlist_with_empty_name_string(self):
+        headers = self.get_auth_header()
+        bucketlist = {'name': ''}
+        response = self.client.post('/bucketlists',
+                                    data=json.dumps(bucketlist),
+                                    headers=headers
+                                    )
+
+        assert response.status_code == 400
+
     def test_lists_bucketlists(self):
         # create bucketlist
         headers = self.get_auth_header()
@@ -276,6 +286,18 @@ class TestItemsApi(BaseTestCase):
 
         data = json.loads(response.get_data(as_text=True))
         assert data["message"] == "You did not include the item name."
+
+    def test_does_not_add_bucketlist_item_with_empty_string_name(self):
+        self.create_bucketlist()
+        headers = self.get_auth_header()
+
+        item = json.dumps({"name": ''})
+        response = self.client.post("/bucketlists/1/items",
+                                    data=item, headers=headers
+                                    )
+        assert response.status_code == 400
+
+        data = json.loads(response.get_data(as_text=True))
 
     def test_doesnt_add_bucketlist_item_if_non_existent_bucketlist_id(self):
         headers = self.get_auth_header()

@@ -111,11 +111,11 @@ def create_bucketlist():
 @app.route("/bucketlists", methods=['GET'])
 @jwt_required()
 def get_all_bucketlists():
-    '''List all the created bucket lists'''
-    # get json of users bucketlists
-    # return bucketlists
+    '''
+    List all the created bucket lists and search bucketlists by name
+    '''
     response = {}
-    name = request.args.get('q')
+    name = request.args.get('q')  # search string
     limit = request.args.get('limit')
     offset = request.args.get('offset')
 
@@ -162,34 +162,6 @@ def get_all_bucketlists():
     return response
 
 
-#@app.route("/bucketlists?q=<name>", methods=['GET'], defaults={'name': None})
-#@jwt_required()
-def search_bucketlist(name):
-    response = {}
-    response["bucketlists"] = []
-    response["meta"] = {}
-
-    if name is not None and len(name) > 0:
-        name = name.lower()
-        query = "%" + name + "%"
-        bucketlists = BucketList.query.filter(
-            BucketList.name.like(query)).filter_by(
-            owner_id=current_identity.user_id).all()
-
-        for bucketlist in bucketlists:
-            response["bucketlists"].append(bucketlist.to_json())
-
-        status_code = 200
-
-    else:
-        status_code = 404
-        response["message"] = "No bucketlists by that name found."
-
-    response = jsonify(response)
-    response.status_code = status_code
-    return response
-
-
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['GET'])
 @jwt_required()
 def get_single_bucketlist(bucketlist_id):
@@ -218,10 +190,6 @@ def get_single_bucketlist(bucketlist_id):
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['PUT'])
 @jwt_required()
 def update_single_bucketlist(bucketlist_id):
-    # validate request
-    # get bucketlist
-    # update item
-    # save
     response = {}
     json = request.json
     validation = validate_bucketlist(json)
@@ -253,9 +221,6 @@ def update_single_bucketlist(bucketlist_id):
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['DELETE'])
 @jwt_required()
 def delete_single_bucketlist(bucketlist_id):
-    # check if bucketlist
-    # remove bucketlist
-    # return response
     response = {}
     user_id = current_identity.user_id
     bucketlist = BucketList.query.filter(
@@ -281,10 +246,6 @@ def delete_single_bucketlist(bucketlist_id):
 @app.route("/bucketlists/<int:bucketlist_id>/items", methods=['POST'])
 @jwt_required()
 def create_bucketlist_item(bucketlist_id):
-    # check and get if bucketlist
-    # validate request
-    # create item and put in bucketlist
-    # save
     response = {}
     json = request.json
     validation = validate_item(json)
@@ -317,10 +278,6 @@ def create_bucketlist_item(bucketlist_id):
 @app.route("/bucketlists/<int:bucketlist_id>/items/<int:item_id>", methods=['PUT'])
 @jwt_required()
 def update_bucketlist_item(bucketlist_id, item_id):
-    # validate request
-    # get bucketlist
-    # update item
-    # save
     response = {}
     json = request.json
     validation = validate_item(json)
