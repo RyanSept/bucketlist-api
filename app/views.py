@@ -53,14 +53,16 @@ def register_user():
             db.session.add(user)
             db.session.commit()
             status_code = 201
+            response["message"] = \
+                "Successfully registered the user with the email %s." % (json["email"])
         else:
             status_code = 409
             response["message"] = \
                 "The user with the email %s already exists" % (json["email"])
     else:
         status_code = 400
+        response["message"] = validation.message
 
-    response["message"] = validation.message
     response = jsonify(response)
     response.status_code = status_code
     return response

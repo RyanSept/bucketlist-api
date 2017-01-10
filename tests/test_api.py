@@ -66,7 +66,7 @@ class TestApi(BaseTestCase):
                                          "password": "password"}),
                                     content_type='application/json'
                                     )
-        token = json.loads(response.get_data(as_text=True))['access_token']
+        token = json.loads(response.get_data(as_text=True))["access_token"]
         ryan = {'Authorization': 'JWT %s' % token,
                 'Content-type': 'application/json'
                 }
@@ -165,7 +165,7 @@ class TestApi(BaseTestCase):
                                          "password": "password"}),
                                     content_type='application/json'
                                     )
-        token = json.loads(response.get_data(as_text=True))['access_token']
+        token = json.loads(response.get_data(as_text=True))["access_token"]
         ryan = {'Authorization': 'JWT %s' % token,
                 'Content-type': 'application/json'
                 }
@@ -299,7 +299,7 @@ class TestItemsApi(BaseTestCase):
                                          "password": "password"}),
                                     content_type='application/json'
                                     )
-        token = json.loads(response.get_data(as_text=True))['access_token']
+        token = json.loads(response.get_data(as_text=True))["access_token"]
         ryan = {'Authorization': 'JWT %s' % token,
                 'Content-type': 'application/json'
                 }

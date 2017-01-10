@@ -9,9 +9,8 @@ import json
 
 class BaseTestCase(TestCase):
     def setUp(self):
-        app.config['DATABASE'] = "test.db"
-        app.config['TESTING'] = True
-        app.config['CSRF_ENABLED'] = False
+        app.config.from_object('config.TestConfig')
+        db.create_all()
         self.client = app.test_client()
 
     def login(self):
@@ -22,7 +21,7 @@ class BaseTestCase(TestCase):
                                     content_type='application/json')
 
         data = json.loads(response.get_data(as_text=True))
-        return data['access_token']
+        return data["access_token"]
 
     def get_auth_header(self):
         token = self.login()
