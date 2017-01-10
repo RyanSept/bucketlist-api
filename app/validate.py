@@ -69,3 +69,17 @@ def validate_item(json):
         validation.status = False
         validation.message = "You did not include the item name."
         return validation
+
+
+def validate_limit_and_offset(limit, offset):
+    validation = Validation()
+    try:
+        if limit is not None and offset is not None:
+            limit = int(limit)
+            offset = int(offset)
+            validation.status = True
+        else:
+            validation.status = True
+    except ValueError:
+        validation.status = False
+    return validation

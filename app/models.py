@@ -40,13 +40,21 @@ class User(db.Model):
     def check_password(self, password):
         return password == self.password
 
-    def get_bucketlists_as_json(self):
+    def get_bucketlists_as_json(self, limit, offset):
         '''returns list of bucketlists owned by the user'''
+        if limit is None:
+            limit = 20
+        if offset is None:
+            offset = 0
+
+        limit = int(limit)
+        offset = int(offset)
+
         list_bucketlists = []
         for bucketlist in self.bucketlists:
             list_bucketlists.append(bucketlist.to_json())
 
-        return list_bucketlists
+        return list_bucketlists[offset:limit + offset]
 
     def __repr__(self):
         return '<User %s %s>' % (self.first_name, self.last_name)

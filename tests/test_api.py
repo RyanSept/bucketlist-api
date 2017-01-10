@@ -218,6 +218,33 @@ class TestApi(BaseTestCase):
         data = json.loads(response.get_data(as_text=True))
         assert data["message"] == "No bucketlists by that name found."
 
+    def test_limit_get_bucketlist_list(self):
+        headers = self.get_auth_header()
+        bucketlist = {"name": "BucketList"}
+        # add 21 bucketlists
+        for n in range(1, 22):
+            name = bucketlist["name"] + str(n)
+            bucketlist = {"name": name}
+            self.client.post('/bucketlists',
+                             data=json.dumps(bucketlist),
+                             headers=headers
+                             )
+
+        # get bucketlists with limit
+        response = self.client.get('/bucketlists?limit=20&offset=15',
+                                   headers=headers)
+        assert response.status_code == 200
+        data = json.loads(response.get_data(as_text=True))
+        assert len(data["bucketlists"]) <= 20
+
+    def test_limit_get_bucketlist_list_handles_non_int_as_query_string(self):
+        headers = self.get_auth_header()
+        self.create_bucketlist()
+        # get bucketlists with limit
+        response = self.client.get('/bucketlists?limit=foo&offset=10',
+                                   headers=headers)
+        assert response.status_code == 400
+
 
 class TestItemsApi(BaseTestCase):
     def test_add_bucketlist_item(self):

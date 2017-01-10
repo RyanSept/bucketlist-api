@@ -5,7 +5,8 @@ from app import app, db
 from app.models import User, BucketList, ListItem
 from flask_jwt import JWT, jwt_required, current_identity
 from flask import request, g, jsonify, abort
-from app.validate import validate_register, validate_bucketlist, validate_item
+from app.validate import validate_register, validate_bucketlist, validate_item\
+    , validate_limit_and_offset
 
 
 def verify_password(email, password):
@@ -95,15 +96,23 @@ def get_all_bucketlists():
     # return bucketlists
     response = {}
     name = request.args.get('q')
+    limit = request.args.get('limit')
+    offset = request.args.get('offset')
 
     if name is None:
-        response["bucketlists"] = current_identity.get_bucketlists_as_json()
-        response["meta"] = {}
-        status_code = 200
+        validation = validate_limit_and_offset(limit, offset)
+        if validation.status:
+            response["bucketlists"] = current_identity.get_bucketlists_as_json(
+                limit, offset)
+            response["meta"] = {}
+            status_code = 200
 
-        if len(response["bucketlists"]) < 1:
-            status_code = 404
-            response["message"] = "No bucketlists exist."
+            if len(response["bucketlists"]) < 1:
+                status_code = 404
+                response["message"] = "No bucketlists exist."
+        else:
+            status_code = 400
+            response["message"] = "Invalid format for limit or offset. Should be integer"
 
     elif name is not None and len(name) > 0:
         response["bucketlists"] = []
@@ -123,6 +132,9 @@ def get_all_bucketlists():
         else:
             status_code = 404
             response["message"] = "No bucketlists by that name found."
+
+    else:
+        status_code = 400
 
     response = jsonify(response)
     response.status_code = status_code
