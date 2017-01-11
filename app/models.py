@@ -1,7 +1,5 @@
 from datetime import datetime
 from app import app, db
-from itsdangerous import (TimedJSONWebSignatureSerializer
-                          as Serializer, BadSignature, SignatureExpired)
 
 
 class User(db.Model):
