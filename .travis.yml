@@ -9,4 +9,4 @@ before_script:
   - export PYTHONPATH=`pwd`
 script: "nosetests --with-coverage --cover-package=app"
 after_sucess:
-  coveralls
+  - coveralls
