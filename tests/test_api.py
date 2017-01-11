@@ -87,7 +87,7 @@ class TestApi(BaseTestCase):
                                    headers=headers
                                    )
 
-        assert response.status_code == 204
+        assert response.status_code == 200
 
     def test_does_not_update_bucketlist_if_no_data_given(self):
         headers = self.get_auth_header()
@@ -117,7 +117,7 @@ class TestApi(BaseTestCase):
 
         response = self.client.delete('/bucketlists/1', headers=headers)
 
-        assert response.status_code == 204
+        assert response.status_code == 200
 
     def test_delete_when_bucketlist_doesnt_exist(self):
         headers = self.get_auth_header()
@@ -229,7 +229,7 @@ class TestItemsApi(BaseTestCase):
                                    data=json.dumps(item_update),
                                    headers=headers
                                    )
-        assert response.status_code == 204
+        assert response.status_code == 200
 
     def test_doesnt_update_bucketlist_item_if_invalid_data(self):
         headers = self.get_auth_header()
@@ -268,7 +268,7 @@ class TestItemsApi(BaseTestCase):
                                       headers=headers
                                       )
 
-        assert response.status_code == 204
+        assert response.status_code == 200
 
     def test_delete_when_bucketlist_item_doesnt_exist(self):
         headers = self.get_auth_header()

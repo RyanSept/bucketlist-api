@@ -3,19 +3,22 @@ from app import app, models, db
 from flask_sqlalchemy import SQLAlchemy
 import json
 
+app.config.from_object('config.TestConfig')
+db.create_all()
+
 
 class BaseTestCase(TestCase):
     def setUp(self):
-        app.config.from_object('config.TestConfig')
-        db.create_all()
         self.client = app.test_client()
+        self.add_test_user()
 
     def login(self):
         response = self.client.post('/auth/login',
                                     data=json.dumps(
-                                        {'email': 'johndoe@gmail.com',
-                                         'password': "password"}),
-                                    content_type='application/json')
+                                        {"email": "johndoe@gmail.com",
+                                         "password": "password"}),
+                                    content_type='application/json'
+                                    )
 
         data = json.loads(response.get_data(as_text=True))
         return data["access_token"]
@@ -77,3 +80,17 @@ class BaseTestCase(TestCase):
                          data=json.dumps(item),
                          headers=headers
                          )
+
+    def add_test_user(self):
+        user_data = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "johndoe@gmail.com",
+            "password": "password",
+        }
+
+        self.client.post(
+            "/auth/register",
+            content_type="application/json",
+            data=json.dumps(user_data)
+        )

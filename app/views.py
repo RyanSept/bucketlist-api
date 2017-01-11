@@ -203,7 +203,7 @@ def update_single_bucketlist(bucketlist_id):
         db.session.commit()
         validation.message = "Bucketlist %d successfully updated!" % (
             bucketlist_id)
-        status_code = 204
+        status_code = 200
     else:
         status_code = 400
 
@@ -229,7 +229,7 @@ def delete_single_bucketlist(bucketlist_id):
 
     if bucketlist is not None:
         db.session.delete(bucketlist)
-        status_code = 204
+        status_code = 200
         response["message"] = "The bucketlist with id %d has been deleted" % (
             bucketlist.bucketlist_id)
         db.session.commit()
@@ -298,7 +298,7 @@ def update_bucketlist_item(bucketlist_id, item_id):
             db.session.commit()
             validation.message = "Bucketlist item %d successfully updated!" % (
                 item_id)
-            status_code = 204
+            status_code = 200
         else:
             status_code = 400
     else:
@@ -328,7 +328,7 @@ def delete_item_from_bucketlist(bucketlist_id, item_id):
 
     if bucketlist_item is not None:
         db.session.delete(bucketlist_item)
-        status_code = 204
+        status_code = 200
         response["message"] = "The bucketlist item with id %d has been deleted" % (
             item_id)
         db.session.commit()
