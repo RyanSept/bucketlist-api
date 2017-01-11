@@ -14,6 +14,8 @@ This is an API that provides access to a bucketlist.
 ##Installation
 To install first navigate to the directory of your choice on your computer and run `git clone https://github.com/RyanSept/bucketlist-api.git` .
 
+Change into the app directory by running `cd BucketList`.
+
 After successfully doing this, call `git checkout develop` .
 
 Install the requirements using `pip install -r requirements.txt`.
@@ -24,6 +26,8 @@ Use nosetests to run tests (with coverage) like this: `nosetests --with-coverage
 
 ##Usage
 
+You can run the application with `python manage.py`
+
 | EndPoint                            | Allowed Methods  | Functionality                                    | Requires Token |
 |-------------------------------------|------------------|--------------------------------------------------|----------------|
 | `/auth/login`                       | POST             | Logs a user in                                   | No             |
@@ -32,6 +36,7 @@ Use nosetests to run tests (with coverage) like this: `nosetests --with-coverage
 | `/bucketlists/<id>`                 | GET, PUT, DELETE | Retrieve, update and delete a single bucket list | Yes            |
 | `/bucketlists/<id>/items`           | POST             | Create a new item in bucket list                 | Yes            |
 | `/bucketlists/<id>/items/<item_id>` | PUT, DELETE      | Delete an item in a bucket list                  | Yes            |
+
 
 
 
