@@ -4,7 +4,7 @@ import json
 
 
 class TestApi(BaseTestCase):
-    def test_can_create_bucketlist(self):
+    def test_create_bucketlist(self):
         headers = self.get_auth_header()
         bucketlist = {
             "name": "BucketList1",

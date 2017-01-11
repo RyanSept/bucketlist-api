@@ -8,6 +8,9 @@ from app.validate import validate_register, validate_bucketlist, validate_item\
 
 
 def verify_password(email, password):
+    '''
+    Check that the email and password provided during authentication match
+    '''
     g.user = User.query.filter(email == User.email).first()
     if g.user is not None and g.user.check_password(password):
         return g.user
@@ -15,6 +18,10 @@ def verify_password(email, password):
 
 
 def identity(payload):
+    '''
+    Sets the object current_identity to the current user object upon
+    authentication
+    '''
     user_id = payload['identity']
     return User.query.filter(user_id == User.user_id).first()
 
@@ -32,10 +39,14 @@ def user_exists(email):
 @app.route("/resource", methods=['POST'])
 @jwt_required()
 def get_resource():
+    '''
+    For testing if the jwt_required decorator works
+    '''
     return jsonify(dict(msg="Hello world"))
 
 
 def handle_error(error):
+    '''Generic error handlers for all http exceptions'''
     response = {}
     status_code = 500
     if isinstance(error, HTTPException):
@@ -46,13 +57,14 @@ def handle_error(error):
     return jsonify(response), status_code
 
 
-# change error handler to return json instead of html
+# change error handler for all http exceptions to return json instead of html
 for code in default_exceptions.keys():
     app.errorhandler(code)(handle_error)
 
 
 @app.route("/auth/register", methods=['POST'])
 def register_user():
+    '''Register the user'''
     response = {}
     json = request.json
     validation = validate_register(json)
@@ -135,7 +147,7 @@ def get_all_bucketlists():
             response[
                 "message"] = "Invalid format for limit or offset. Should be integer"
 
-    elif name is not None and len(name) > 0:
+    elif name is not None and len(name) > 0:  # carry out search
         response["bucketlists"] = []
 
         name = name.lower()
@@ -165,6 +177,7 @@ def get_all_bucketlists():
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['GET'])
 @jwt_required()
 def get_single_bucketlist(bucketlist_id):
+    '''Gets a single bucketlist with the specified id and returns it'''
     response = {}
     response["bucketlist"] = {}
     response["meta"] = {}
@@ -189,6 +202,7 @@ def get_single_bucketlist(bucketlist_id):
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['PUT'])
 @jwt_required()
 def update_single_bucketlist(bucketlist_id):
+    '''Update the bucketlist by given id'''
     response = {}
     json = request.json
     validation = validate_bucketlist(json)
@@ -220,6 +234,7 @@ def update_single_bucketlist(bucketlist_id):
 @app.route("/bucketlists/<int:bucketlist_id>", methods=['DELETE'])
 @jwt_required()
 def delete_single_bucketlist(bucketlist_id):
+    '''Delete a bucketlist by given id'''
     response = {}
     user_id = current_identity.user_id
     bucketlist = BucketList.query.filter(
@@ -245,6 +260,7 @@ def delete_single_bucketlist(bucketlist_id):
 @app.route("/bucketlists/<int:bucketlist_id>/items", methods=['POST'])
 @jwt_required()
 def add_bucketlist_item(bucketlist_id):
+    '''Create a bucketlist item and add it to bucketlist with given id'''
     response = {}
     json = request.json
     validation = validate_item(json)
@@ -277,6 +293,7 @@ def add_bucketlist_item(bucketlist_id):
 @app.route("/bucketlists/<int:bucketlist_id>/items/<int:item_id>", methods=['PUT'])
 @jwt_required()
 def update_bucketlist_item(bucketlist_id, item_id):
+    '''Make changes to a bucketlist item'''
     response = {}
     json = request.json
     validation = validate_item(json)
@@ -314,6 +331,7 @@ def update_bucketlist_item(bucketlist_id, item_id):
 @app.route("/bucketlists/<int:bucketlist_id>/items/<int:item_id>", methods=['DELETE'])
 @jwt_required()
 def delete_item_from_bucketlist(bucketlist_id, item_id):
+    '''Delete bucketlist item from a bucketlist'''
     response = {}
     user_id = current_identity.user_id
     bucketlist = BucketList.query.filter_by(
