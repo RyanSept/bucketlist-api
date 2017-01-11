@@ -14,8 +14,6 @@ class TestAuthentication(BaseTestCase):
                                     )
 
         assert response.status_code == 200
-        data = json.loads(response.get_data(as_text=True))
-        self.assertIn('access_token', data)
 
     def test_login_with_wrong_credentials(self):
         response = self.client.post('/auth/login',
@@ -43,37 +41,9 @@ class TestAuthentication(BaseTestCase):
                                     )
         assert response.status_code == 401
 
-    def test_cannot_post_to_bucketlists_if_not_authenticated(self):
-        response = self.client.post('/bucketlists',
+    def test_cannot_access_resource_if_not_authenticated(self):
+        response = self.client.post('/resource',
                                     content_type="application/json",)
-        assert response.status_code == 401
-
-    def test_cannot_get_bucketlists_if_not_authenticated(self):
-        response = self.client.get('/bucketlists')
-        assert response.status_code == 401
-
-    def test_cannot_get_single_bucketlist_if_not_authenticated(self):
-        response = self.client.get('/bucketlists/1')
-        assert response.status_code == 401
-
-    def test_cannot_update_single_bucketlist_if_not_authenticated(self):
-        response = self.client.put('/bucketlists/1')
-        assert response.status_code == 401
-
-    def test_cannot_delete_single_bucketlist_if_not_authenticated(self):
-        response = self.client.delete('/bucketlists/1')
-        assert response.status_code == 401
-
-    def test_cannot_create_bucketlist_item_if_not_authenticated(self):
-        response = self.client.post('/bucketlists/1/items')
-        assert response.status_code == 401
-
-    def test_cannot_update_bucketlist_item_if_not_authenticated(self):
-        response = self.client.put('/bucketlists/1/items/1')
-        assert response.status_code == 401
-
-    def test_cannot_delete_bucketlist_item_if_not_authenticated(self):
-        response = self.client.put('/bucketlists/1/items/1')
         assert response.status_code == 401
 
     def test_can_register(self):
@@ -91,10 +61,6 @@ class TestAuthentication(BaseTestCase):
         )
         assert response.status_code == 201
 
-        new_user = User.query.filter(user_data['email'] == User.email).first()
-
-        self.assertIsNotNone(new_user)
-
     def test_does_not_register_with_missing_fields(self):
         user_data = {
             "email": "ryan.marvin@andela.com",
@@ -106,9 +72,6 @@ class TestAuthentication(BaseTestCase):
             data=json.dumps(user_data)
         )
         assert response.status_code == 400
-
-        new_user = User.query.filter(user_data['email'] == User.email).first()
-        self.assertIsNone(new_user)
 
     def test_register_validates_email(self):
         user_data = {
@@ -124,7 +87,8 @@ class TestAuthentication(BaseTestCase):
             data=json.dumps(user_data)
         )
 
-        assert response.status_code == 400
+        data = json.loads(response.get_data(as_text=True))
+        self.assertIn("message", data)
 
     def test_register_rejects_password_less_than_8_chars(self):
         user_data = {
@@ -140,7 +104,8 @@ class TestAuthentication(BaseTestCase):
             data=json.dumps(user_data)
         )
 
-        assert response.status_code == 400
+        data = json.loads(response.get_data(as_text=True))
+        self.assertIn("message", data)
 
     def test_cannot_register_twice(self):
         user_data = {
@@ -158,10 +123,6 @@ class TestAuthentication(BaseTestCase):
 
         assert response.status_code == 201
 
-        response2 = self.client.post(
-            "/auth/register",
-            content_type="application/json",
-            data=json.dumps(user_data)
-        )
+        response2 = self.register_second_user()
 
         assert response2.status_code == 409

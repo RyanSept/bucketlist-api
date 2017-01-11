@@ -60,11 +60,13 @@ class BaseTestCase(TestCase):
             "password": "password",
         }
 
-        self.client.post(
+        response = self.client.post(
             "/auth/register",
             content_type="application/json",
             data=json.dumps(user_data)
         )
+
+        return response
 
     def add_bucketlist_item(self):
         '''adds a bucketlist item'''
