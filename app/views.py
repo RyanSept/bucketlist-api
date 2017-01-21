@@ -1,6 +1,7 @@
 from app import app, db
 from app.models import User, BucketList, ListItem
 from flask_jwt import JWT, jwt_required, current_identity
+from flask_cors import CORS
 from werkzeug.exceptions import HTTPException, default_exceptions
 from flask import request, g, jsonify, abort
 from app.validate import validate_register, validate_bucketlist, validate_item\
@@ -27,6 +28,7 @@ def identity(payload):
 
 
 jwt = JWT(app, verify_password, identity)
+CORS(app)  # allow cross origin resource sharing
 
 
 def user_exists(email):
@@ -61,6 +63,36 @@ def handle_error(error):
 for code in default_exceptions.keys():
     app.errorhandler(code)(handle_error)
 
+
+@app.route("/auth/login", methods=['POST'])
+def login():
+    '''This handles logging in and returns a token upon
+        successful authentication
+    '''
+    response = {}
+    json = request.json
+    if json is not None and "password" in json and "email" in json:
+        try:
+            identity = jwt.authentication_callback(
+                json['email'], json['password'])
+        except AttributeError:
+            status_code = 401
+            response['message'] = 'Invalid Credentials'
+
+        if identity:
+            access_token = jwt.jwt_encode_callback(identity)
+            return jwt.auth_response_callback(access_token, identity)
+        else:
+            status_code = 401
+            response['message'] = 'Invalid Credentials'
+
+    else:
+        status_code = 400
+        response["message"] = "Invalid authentication fields."
+
+    response = jsonify(response)
+    response.status_code = status_code
+    return response
 
 @app.route("/auth/register", methods=['POST'])
 def register_user():

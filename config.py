@@ -16,7 +16,6 @@ class Config(object):
 
     JWT_DEFAULT_REALM = 'Login Required'
     JWT_AUTH_USERNAME_KEY = 'email'
-    JWT_AUTH_URL_RULE = '/auth/login'
     JWT_EXPIRATION_DELTA = timedelta(seconds=3600)
 
 
