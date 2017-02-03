@@ -4,7 +4,7 @@ import config
 
 app = Flask(__name__)
 
-app.config.from_object('config.Config')
+app.config.from_object('config.TestConfig')
 app.url_map.strict_slashes = False
 
 db = SQLAlchemy(app)

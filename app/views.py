@@ -94,6 +94,7 @@ def login():
     response.status_code = status_code
     return response
 
+
 @app.route("/auth/register", methods=['POST'])
 def register_user():
     '''Register the user'''
@@ -329,7 +330,7 @@ def update_bucketlist_item(bucketlist_id, item_id):
     response = {}
     json = request.json
     validation = validate_item(json)
-
+    print(json)
     user_id = current_identity.user_id
     bucketlist = BucketList.query.filter_by(
         bucketlist_id=bucketlist_id,
@@ -340,7 +341,7 @@ def update_bucketlist_item(bucketlist_id, item_id):
 
     if bucketlist is not None:
         bucketlist_item = bucketlist.get_item(item_id)
-
+    print(validation.message)
     if bucketlist_item is not None:
         if validation.status:
             bucketlist_item.from_json(json)
