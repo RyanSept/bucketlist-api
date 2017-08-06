@@ -4,6 +4,7 @@ Flask==0.12
 Flask-Cors==3.0.2
 Flask-JWT==0.3.2
 Flask-SQLAlchemy==2.1
+gunicorn==19.7.1
 itsdangerous==0.24
 Jinja2==2.9.4
 MarkupSafe==0.23

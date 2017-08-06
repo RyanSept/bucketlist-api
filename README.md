@@ -11,7 +11,7 @@ This is an API that provides access to a bucketlist.
  - Flask - A python web framework.
  - SQLAlchemy - a python orm.
 
-##Installation
+## Installation
 To install first navigate to the directory of your choice on your computer and run `git clone https://github.com/RyanSept/bucketlist-api.git` .
 
 Change into the app directory by running `cd BucketList`.
@@ -21,10 +21,10 @@ After successfully doing this, call `git checkout develop` .
 Install the requirements using `pip install -r requirements.txt`.
 
 
-##Testing 
+## Testing 
 Use nosetests to run tests (with coverage) like this: `nosetests --with-coverage --cover-package=app`
 
-##Usage
+## Usage
 
 You can run the application with `python manage.py`
 

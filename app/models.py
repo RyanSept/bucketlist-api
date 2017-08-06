@@ -95,14 +95,13 @@ class ListItem(db.Model):
         }
 
     def from_json(self, json):
-        self.item_name = json['name']
         done = False
-        try:
+        if 'name' in json:
+            self.item_name = json['name']
+        if 'done' in json:
             map_ = {'true': True, 'false': False}
             done = map_[json['done']]
             self.done = done
-        except:
-            pass
         self.date_modified = datetime.utcnow()
 
     def __repr__(self):
